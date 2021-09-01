@@ -22,7 +22,7 @@ public class Kisi {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private long id;
 
     @Length(message = "Length is not valid", min = 3, max = 30)
     @NotBlank

@@ -4,6 +4,7 @@ import com.springjwt.model.Eroller;
 import com.springjwt.model.Kisi;
 import com.springjwt.model.KisiRole;
 import com.springjwt.regres.LoginRequest;
+import com.springjwt.regres.LoginResponse;
 import com.springjwt.regres.MesajResponse;
 import com.springjwt.regres.RegisterRequest;
 import com.springjwt.repository.KisiRepository;
@@ -18,8 +19,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class AuthService {
@@ -32,6 +35,8 @@ public class AuthService {
 
     @Autowired
     RoleRepository roleRepository;
+    @Autowired
+    KisiService kisiService;
 
 
     public ResponseEntity<?> registerUser(RegisterRequest registerRequest) {
@@ -101,6 +106,14 @@ public class AuthService {
         Authentication authentication=authenticationManager
                 .authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(),loginRequest.getPassword()));
 
-        return 
+
+        //Kimlik denetimi yapilan kisinin bilgilerinin service katmanindan alinmasi butun bilgilerini aliyoruz
+        KisiServiceImpl loginKisi= (KisiServiceImpl) authentication.getPrincipal();
+
+        //login olan kisinin Rollerinin Elde edeilmesi
+        List<String> roller=loginKisi.getAuthorities().stream()
+                .map(item->item.getAuthority()).collect(Collectors.toList());
+        return ResponseEntity
+                .ok(new LoginResponse(loginKisi.getId(), loginKisi.getUsername(), loginKisi.getEmail(),roller));
     }
 }
