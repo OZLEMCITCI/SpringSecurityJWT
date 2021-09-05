@@ -8,7 +8,7 @@ import java.util.Optional;
 
 
 @Repository
-public interface KisiRepository extends JpaRepository<Kisi, Long > {
+public interface KisiRepository extends JpaRepository<Kisi, Long> {
     Boolean existsByUsername(String username);
     Boolean existsByEmail(String email);
     Optional<Kisi> findByUsername(String username);

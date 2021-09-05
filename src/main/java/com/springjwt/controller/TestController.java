@@ -12,18 +12,24 @@ public class TestController {
 
     @GetMapping("/all")
     public String allAccess(){
-        return "herkese acik icerir";
+        return "Herkese açık içerik";
+    }
+
+    @GetMapping("/user")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER','ROLE_MODERATOR')")
+    public String userAccess(){
+        return "Yalnızca kayitli kişilere ait içerik";
     }
 
     @GetMapping("/mod")
-    @PreAuthorize("hasAnyRole('ROLE_MODERATOR')")
-    public String userAccess(){
-        return "YALNIZCA moderator INSANLAR ERISEBILIR";
+    @PreAuthorize("hasRole( 'ROLE_MODERATOR')")
+    public String modAccess(){
+        return "Yalnızca Moderator'a ait içerik";
     }
 
     @GetMapping("/admin")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole( 'ROLE_ADMIN')")
     public String adminAccess(){
-        return "ADMINE acik icerir";
+        return "Yalnızca Admine ait içerik";
     }
 }

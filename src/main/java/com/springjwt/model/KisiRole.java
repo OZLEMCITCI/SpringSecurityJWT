@@ -1,3 +1,4 @@
+
 package com.springjwt.model;
 
 import lombok.Getter;

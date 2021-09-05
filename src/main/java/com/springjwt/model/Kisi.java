@@ -22,7 +22,7 @@ public class Kisi {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     @Length(message = "Length is not valid", min = 3, max = 30)
     @NotBlank
@@ -40,9 +40,9 @@ public class Kisi {
 
     @ManyToMany(fetch=FetchType.LAZY) //1 kisi many role alabilir bir role 1 den fazla kisi tarafindan kullanilabilir
     @JoinTable(name="kisi_roller", //adi Kisi_roller olan bir tablo olusturuyoruz
-               joinColumns =@JoinColumn(name="kisi_id" ),//1. kolumun adi kisi_id ve default olarak kisi tablosunun id sini aliyor
-               //degismek istersen referencedColumnName ="username" yapabilirisn.
-               inverseJoinColumns = @JoinColumn(name="role_id"))//yukardaki aciklama ile ayni
+            joinColumns =@JoinColumn(name="kisi_id" ),//1. kolumun adi kisi_id ve default olarak kisi tablosunun id sini aliyor
+            //degismek istersen referencedColumnName ="username" yapabilirisn.
+            inverseJoinColumns = @JoinColumn(name="role_id"))//yukardaki aciklama ile ayni
     private Set <KisiRole> roller=new HashSet<>();
 
     public Kisi(String username, String password, String email) {

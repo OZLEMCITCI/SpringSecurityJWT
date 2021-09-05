@@ -1,5 +1,6 @@
 package com.springjwt.regres;
 
+import com.springjwt.model.Eroller;
 import com.springjwt.model.KisiRole;
 import lombok.Getter;
 import lombok.Setter;

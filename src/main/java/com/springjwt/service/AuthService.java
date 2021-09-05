@@ -4,23 +4,23 @@ import com.springjwt.model.Eroller;
 import com.springjwt.model.Kisi;
 import com.springjwt.model.KisiRole;
 import com.springjwt.regres.LoginRequest;
-import com.springjwt.regres.LoginResponse;
+import com.springjwt.regres.JwtResponse;
 import com.springjwt.regres.MesajResponse;
 import com.springjwt.regres.RegisterRequest;
 import com.springjwt.repository.KisiRepository;
 import com.springjwt.repository.RoleRepository;
+import com.springjwt.service.JWT.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -37,6 +37,9 @@ public class AuthService {
     RoleRepository roleRepository;
     @Autowired
     KisiService kisiService;
+
+    @Autowired
+    JwtUtils jwtUtils;
 
 
     public ResponseEntity<?> registerUser(RegisterRequest registerRequest) {
@@ -87,33 +90,40 @@ public class AuthService {
                         roller.add(userRole);
                 }
             });
+
             kisi.setRoller(roller);
             kisiRepository.save(kisi);
-
 
         }
         return ResponseEntity.ok(new MesajResponse("Kullanici basarili kayit edildi"));
     }
 
 
-    //Security config classinda AuthenticationManagerBean() methodunu override yaptik.
-    @Autowired
-    AuthenticationManager authenticationManager;
-
-    public ResponseEntity<?> getUserInfo(LoginRequest loginRequest){
-
-        //kimlik denetimi yapiyoruz
-        Authentication authentication=authenticationManager
-                .authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(),loginRequest.getPassword()));
 
 
-        //Kimlik denetimi yapilan kisinin bilgilerinin service katmanindan alinmasi butun bilgilerini aliyoruz
-        KisiServiceImpl loginKisi= (KisiServiceImpl) authentication.getPrincipal();
+        //Security config classinda AuthenticationManagerBean() methodunu override yaptik.
+        @Autowired
+        AuthenticationManager authenticationManager;
 
-        //login olan kisinin Rollerinin Elde edeilmesi
-        List<String> roller=loginKisi.getAuthorities().stream()
-                .map(item->item.getAuthority()).collect(Collectors.toList());
-        return ResponseEntity
-                .ok(new LoginResponse(loginKisi.getId(), loginKisi.getUsername(), loginKisi.getEmail(),roller));
+        public ResponseEntity<?> getUserInfo (LoginRequest loginRequest){
+
+            //kimlik denetimi yapiyoruz token olusturuyorz
+            Authentication authentication = authenticationManager
+                    .authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
+
+            //Kisiye gore JWT olusturulmasi ve Security Contex in guncellenmesi
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+
+            String jwt= jwtUtils.jwtCreate(authentication);//jwtolusturuldu
+
+            //Kimlik denetimi yapilan kisinin bilgilerinin service katmanindan alinmasi butun bilgilerini aliyoruz
+            KisiServiceImpl loginKisi = (KisiServiceImpl) authentication.getPrincipal();
+
+            //login olan kisinin Rollerinin Elde edeilmesi
+            List<String> roller = loginKisi.getAuthorities().stream()
+                    .map(item -> item.getAuthority()).collect(Collectors.toList());
+            return ResponseEntity
+                    .ok(new JwtResponse(jwt, loginKisi.getId(), loginKisi.getUsername(), loginKisi.getEmail(), roller));
+        }
     }
-}
+
